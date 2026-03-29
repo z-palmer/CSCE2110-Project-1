@@ -1,51 +1,112 @@
 #ifndef INACTIVEDRIVERDATABASE_HPP
 #define INACTIVEDRIVERDATABASE_HPP
 
-#include "string"
+#include <string>
+#include <iostream>
 
 #include "Driver.hpp"
+
+struct Node {
+
+    Driver driver;
+    Node* next = nullptr;
+
+};
 
 class InactiveDatabase {
 
     private:
 
-        Driver* data;
+        Node** table;
 
-        int space;
+        InactiveDatabase(int size) : capacity(size) {
 
-        int capacity;
+            table = new Node*[size];
+
+            for (int i = 0; i < size; ++i) {
+
+                table[i] = new Node[1];
+
+            }
+
+        }
+
+        ~InactiveDatabase() {
+
+            for (int i = 0; i < capacity; ++i) {
+
+                delete[] table[i];
+
+            }
+
+            delete[] table;
+
+        }
+
+        int space = 100;
+
+        int capacity = 100;
 
 
     public:
 
-        Driver* search() {
+        void search() {
 
+            int key;
 
+            std::cout << "Enter DL Number: ";
+            std::cin >> key;
 
-        }
+            int index = hash(key);
 
-        void insert(Driver newDriver) {
+            if(table[index].Driver->GetDL() == key) {
 
-
-
-        }
-
-        int hash(std::string key) {
-
-            int A = 1;
-            int B = 0;
-
-            int i = 0;
-
-            while(key[i] != '\0') {
-
-                A += key[i] % 65521;
-                B += A % 65521;
-                ++i;
+                
 
             }
 
-            return (B << 16 | A);
+        }
+
+    void insert(Driver newDriver) {
+
+        int index = hash(newDriver.GetDL());
+
+        Node newNode = {newDriver, nullptr}; 
+        
+        if(table[index] == nullptr) {
+
+            table[index] = &newNode;
+
+        }
+        else {
+
+            Node* currentNode = table[index];
+
+            while(currentNode->next != nullptr) {
+
+                currentNode = currentNode->next;
+
+            }
+
+           currentNode = &newNode;
+
+        }
+        
+    }
+
+        int hash(int key) {
+
+            long long square = (long long) key * key;
+
+            int middleDigits = (square / 100) % 100;
+
+            std::string s = std::to_string(square);
+
+            int mid = s.length() / 2;
+
+            std::string res = s.substr(std::max(0, mid - 1), 2); 
+
+            return std::stoi(res) % capacity;
 
         }
 
