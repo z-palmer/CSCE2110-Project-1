@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <array>
 
 #include "Driver.hpp"
 
@@ -50,6 +51,34 @@ class InactiveDatabase {
 
     public:
 
+        void display(Node driver) {
+
+            std::cout << "DL number: " << driver.driver.GetDL() << std::endl;
+
+            std::cout << "Age: " << driver.driver.GetAge() << std::endl;
+
+            std::cout << "Experience: " << driver.driver.GetExperience() << std::endl;
+
+            Address workArea = driver.driver.GetWork();
+            
+            std::cout << "Work Area: " << workArea.GetNumber() << " " << workArea.GetStreet() << ", " << workArea.GetCity() << ", " << workArea.GetState() << ", " << workArea.GetZip() << std::endl;
+
+            Address* frequent = driver.driver.GetFrequent();
+
+            int i = 0;
+
+            std::cout << "Frequent Loacations: " << std::endl;
+
+            while(i < 4) {
+
+                std::cout << "Address " << i+1 << ": " << frequent[i].GetNumber() << " " << frequent[i].GetStreet() << ", " << frequent[i].GetCity() << ", " << frequent[i].GetState() << ", " << frequent[i].GetZip() << std::endl;
+                ++i;
+
+            }
+
+
+        }
+
         void search() {
 
             int key;
@@ -59,9 +88,24 @@ class InactiveDatabase {
 
             int index = hash(key);
 
-            if(table[index].Driver->GetDL() == key) {
+            Node indexedDriver = *table[index];
 
-                
+            if(indexedDriver.driver.GetDL() == key) {
+
+                display(indexedDriver);
+
+            }
+            else {
+
+                Node currentNode = *table[index];
+
+                while(currentNode.driver.GetDL() != key) {
+
+                    currentNode = *currentNode.next;
+
+                }
+
+                display(currentNode);
 
             }
 
