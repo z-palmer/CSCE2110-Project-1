@@ -8,24 +8,69 @@
 class SearchDatabase {
 
     private:
-
-        Driver* data;
-
+        Driver** data;
         int space;
-
         int capacity;
 
     public:
+        SearchDatabase() {
+            capacity = 100;
+            space = 0;
 
-        void insert() {}
+            data = new Driver*[capacity];
 
-        void pushBack() {}
+            for (int i = 0; i < capacity; i++) {
+                data[i] = nullptr;
+            }
+        }
 
-        void pushFront() {}
+        ~SearchDatabase() {
+            delete[] data;
+        }
 
-        Driver* search() {}
+        void insert(Driver* newDriver) {
+            pushBack(newDriver);
+        }
 
-        void makeInactive() {}
+        void pushBack(Driver* newDriver) {
+            std::string key = std::to_string(newDriver->GetDL());
+            int index = hash(key) % capacity;
+
+            if (data[index] == nullptr) {
+                data[index] = newDriver;
+                space++;
+            }
+        }
+
+        void pushFront(Driver* newDriver) {
+            std::string key = std::to_string(newDriver->GetDL());
+            int index = hash(key) % capacity;
+
+            data[index] = newDriver;
+        }
+
+        Driver* search(std::string key) {
+            int index = hash(key) % capacity;
+
+            if (data[index] != nullptr) {
+                if (std::to_string(data[index]->GetDL()) == key) {
+                    return data[index];
+                }
+            }
+
+            return nullptr;
+        }
+
+        void makeInactive(std::string key) {
+            int index = hash(key) % capacity;
+
+            if (data[index] != nullptr) {
+                if (std::to_string(data[index]->GetDL()) == key) {
+                    data[index] = nullptr;
+                    space--;
+                }
+            }
+        }
 
         int hash(std::string key) {
 
