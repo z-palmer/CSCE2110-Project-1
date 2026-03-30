@@ -15,11 +15,10 @@ class SearchDatabase {
         int capacity;
 
     public:
-
         SearchDatabase(int size = 100) {
             capacity = size;
             table = new Node*[capacity];
-            for (int i = 0; i < capacity; ++i) {
+            for (int i = 0; i < capacity; i++) {
                 table[i] = nullptr;
             }
         }
