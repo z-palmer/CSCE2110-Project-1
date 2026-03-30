@@ -6,6 +6,10 @@
 #include "SearchDatabase.hpp"
 #include "OrderedDatabase.hpp"
 #include "InactiveDriverDatabase.hpp"
+#include "Address.hpp"
+#include "Date.hpp"
+#include "Driver.hpp"
+#include "Ticket.hpp"
 
 using namespace std;
 
@@ -18,6 +22,7 @@ void retrieveOldest(OrderedDatabase& orderedDB); // retrieve N oldest licenses
 void moveInactive(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDriverDatabase& inactiveDB); // move driver to inactive database  
 void displayDrivers(OrderedDatabase& orderedDB); // display N drivers
 void exitProgram(); // exit
+void displayDriver(Driver* driver); // helper function to display driver details
 
 int main() {
     SearchDatabase searchDB;
@@ -323,8 +328,8 @@ void displayDrivers(OrderedDatabase& orderedDB) {
     cout << "\nDisplaying " << n << " drivers:\n";
 
     while (current != nullptr && count < n) {
-        current->data->display();
-        cout << "--------------------------\n";
+        displayDriver(current->data);
+        cout << endl;
         current = current->next;
         count++;
     }
