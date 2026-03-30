@@ -6,6 +6,10 @@
 #include "SearchDatabase.hpp"
 #include "OrderedDatabase.hpp"
 #include "InactiveDriverDatabase.hpp"
+#include "Address.hpp"
+#include "Date.hpp"
+#include "Driver.hpp"
+#include "Ticket.hpp"
 
 using namespace std;
 
@@ -18,6 +22,7 @@ void retrieveOldest(OrderedDatabase& orderedDB); // retrieve N oldest licenses
 void moveInactive(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDatabase& inactiveDB); // move driver to inactive database  
 void displayDrivers(OrderedDatabase& orderedDB); // display N drivers
 void exitProgram(); // exit
+void displayDriver(Driver* driver); // helper function to display driver details
 
 int main() {
     SearchDatabase searchDB;
@@ -41,37 +46,38 @@ void load(SearchDatabase& searchDB, OrderedDatabase& orderedDB) {
     }
 
     string line;
-
-    getline(inFile, line);
+    getline(inFile, line); // skip header row
 
     while (getline(inFile, line)) {
         stringstream ss(line);
 
-        string name, street, city, state, county;
-        string dobMonthStr, dobDayStr, dobYearStr;
-        string dlNumStr, expStr;
+        string dlStr, ageStr, expStr;
+        string street, city, state;
+        string zipStr, numberStr;
 
-        getline(ss, name, ',');
+        getline(ss, dlStr, ',');
+        getline(ss, ageStr, ',');
+        getline(ss, expStr, ',');
         getline(ss, street, ',');
         getline(ss, city, ',');
         getline(ss, state, ',');
-        getline(ss, county, ',');
-        getline(ss, dobMonthStr, ',');
-        getline(ss, dobDayStr, ',');
-        getline(ss, dobYearStr, ',');
-        getline(ss, dlNumStr, ',');
-        getline(ss, expStr, ',');
+        getline(ss, zipStr, ',');
+        getline(ss, numberStr, ',');
 
-        int dobMonth = stoi(dobMonthStr);
-        int dobDay = stoi(dobDayStr);
-        int dobYear = stoi(dobYearStr);
-        int dlNum = stoi(dlNumStr);
-        int exp = stoi(expStr);
+        Address work;
+        work.SetStreet(street);
+        work.SetCity(city);
+        work.SetState(state);
+        work.SetZip(stoi(zipStr));
+        work.SetNumber(stoi(numberStr));
 
-        Address* addr = new Address(street, city, state, county);
-        Date* dob = new Date(dobMonth, dobDay, dobYear);
-
-        Driver* newDriver = new Driver(name, addr, dob, dlNum, exp);
+        Driver* newDriver = new Driver;
+        newDriver->SetDL(stoi(dlStr));
+        newDriver->SetAge(stoi(ageStr));
+        newDriver->SetExperience(stoi(expStr));
+        newDriver->SetWork(work);
+        newDriver->SetFrequent(nullptr);
+        newDriver->SetTickets(nullptr);
 
         searchDB.insert(newDriver);
         orderedDB.push(newDriver);
@@ -143,45 +149,50 @@ void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveD
 //function to insert a new driver into both the search and ordered databases
 
 void insertDriver(SearchDatabase& searchDB, OrderedDatabase& orderedDB) {
-    string name, street, city, state, county;
-    int month, day, year;
-    int dlNum, exp;
+    int dlNum, age, exp;
+    string street, city, state;
+    int zip, number;
+
+    cout << "Enter driver's license number: ";
+    cin >> dlNum;
+
+    cout << "Enter driver's age: ";
+    cin >> age;
+
+    cout << "Enter years of experience: ";
+    cin >> exp;
 
     cin.ignore();
 
-    cout << "Enter driver name: ";
-    getline(cin, name);
-
-    cout << "Enter street: ";
+    cout << "Enter work street: ";
     getline(cin, street);
 
-    cout << "Enter city: ";
+    cout << "Enter work city: ";
     getline(cin, city);
 
-    cout << "Enter state: ";
+    cout << "Enter work state: ";
     getline(cin, state);
 
-    cout << "Enter county: ";
-    getline(cin, county);
+    cout << "Enter work zip code: ";
+    cin >> zip;
 
-    cout << "Enter birth month: ";
-    cin >> month;
+    cout << "Enter work street number: ";
+    cin >> number;
 
-    cout << "Enter birth day: ";
-    cin >> day;
+    Address work;
+    work.SetStreet(street);
+    work.SetCity(city);
+    work.SetState(state);
+    work.SetZip(zip);
+    work.SetNumber(number);
 
-    cout << "Enter birth year: ";
-    cin >> year;
-
-    cout << "Enter license number: ";
-    cin >> dlNum;
-
-    cout << "Enter years of driving experience: ";
-    cin >> exp;
-
-    Address* addr = new Address(street, city, state, county);
-    Date* dob = new Date(month, day, year);
-    Driver* newDriver = new Driver(name, addr, dob, dlNum, exp);
+    Driver* newDriver = new Driver;
+    newDriver->SetDL(dlNum);
+    newDriver->SetAge(age);
+    newDriver->SetExperience(exp);
+    newDriver->SetWork(work);
+    newDriver->SetFrequent(nullptr);
+    newDriver->SetTickets(nullptr);
 
     searchDB.insert(newDriver);
     orderedDB.push(newDriver);
@@ -201,7 +212,7 @@ void searchDriver(SearchDatabase& searchDB) {
     Driver* target = searchDB.search(criteria);
 
     if (target != nullptr) {
-        target->display();
+        displayDriver(target);
     } else {
         cout << "Driver not found.\n";
     }
@@ -229,8 +240,9 @@ void retrieveRecent(OrderedDatabase& orderedDB) {
 
     cout << "\nShowing " << actualCount << " most recent licenses:\n";
     for (int i = 0; i < actualCount; i++) {
-        recentArr[i].display();
-        cout << "--------------------------\n";
+        Driver* temp = &recentArr[i];
+        displayDriver(temp);
+        cout << endl;
     }
 
     delete[] recentArr;
@@ -258,8 +270,9 @@ void retrieveOldest(OrderedDatabase& orderedDB) {
 
     cout << "\nShowing " << actualCount << " oldest licenses:\n";
     for (int i = 0; i < actualCount; i++) {
-        oldestArr[i].display();
-        cout << "--------------------------\n";
+        Driver* temp = &oldestArr[i];
+        displayDriver(temp);
+        cout << endl;
     }
 
     delete[] oldestArr;
@@ -299,8 +312,8 @@ void displayDrivers(OrderedDatabase& orderedDB) {
     cout << "\nDisplaying " << n << " drivers:\n";
 
     while (current != nullptr && count < n) {
-        current->data->display();
-        cout << "--------------------------\n";
+        displayDriver(&(current->data));
+        cout << endl;
         current = current->next;
         count++;
     }
@@ -310,4 +323,23 @@ void displayDrivers(OrderedDatabase& orderedDB) {
 
 void exitProgram() {
     cout << "Exiting program...\n";
+}
+
+
+void displayDriver(Driver* driver) {
+    if (driver == nullptr) {
+        cout << "Driver not found.\n";
+        return;
+    }
+
+    cout << "DL Number: " << driver->GetDL() << endl;
+    cout << "Age: " << driver->GetAge() << endl;
+    cout << "Experience: " << driver->GetExperience() << endl;
+
+    Address work = driver->GetWork();
+    cout << "Work Street: " << work.GetStreet() << endl;
+    cout << "Work City: " << work.GetCity() << endl;
+    cout << "Work State: " << work.GetState() << endl;
+    cout << "Work Zip: " << work.GetZip() << endl;
+    cout << "Work Number: " << work.GetNumber() << endl;
 }
