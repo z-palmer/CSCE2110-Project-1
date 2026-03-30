@@ -1,5 +1,6 @@
 #ifndef DATE_HPP
 #define DATE_HPP
+using namespace std;
 
 class Date{
 
@@ -11,69 +12,38 @@ class Date{
 
         int year;
 
-        int hour;
-
-        int minutes;
-
     public:
+        
+        Date () : day(1), month(1), year(2000) {}
 
-        int GetDay() {
+        Date(int d, int m, int y) {
+            day = d;
+            month = m;
+            year = y;
+    
+        }
+    
+        int getDay() const {
 
             return this->day;
 
         }
 
-        int GetMonth() {
+        int getMonth() const {
 
             return this->month;
 
         }
 
-        int GetYear() {
+        int getYear() const {
 
             return this->year;
 
         }
 
-        int GetHour() {
+        bool operator==(const Date& other) const {
 
-            return this->hour;
-
-        }
-
-        int GetMinutes() {
-
-            return this->minutes;
-
-        }
-
-        void SetDay(int newDay) {
-
-            this->day = newDay;
-
-        }
-
-        void SetMonth(int newMonth) {
-
-            this->month = newMonth;
-
-        }
-
-        void SetYear(int newYear) {
-
-            this->year = newYear;
-
-        }
-
-        void SetHour(int newHour) {
-
-            this->hour = newHour;
-
-        }
-
-        void SetMinutes(int newMinutes) {
-
-            this->minutes = newMinutes;
+            return (this->day == other.day) && (this->month == other.month) && (this->year == other.year);
 
         }
 

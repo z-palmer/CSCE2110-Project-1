@@ -2,80 +2,62 @@
 #define ADDRESS_HPP
 
 #include <string>
+using namespace std;
 
 class Address {
 
     private:
 
-        std::string street;
+        string street;
 
-        std::string city;
+        string city;
 
-        std::string state;
+        string state;
+
+        string country;
 
         int zipCode;
 
-        int number;
-
     public:
 
-        std::string GetStreet() {
+        Address () {}
+
+        Address(string s, string c, string st, string co, int z) {
+            street = s;
+            city = c;
+            state = st;
+            country = co;
+            zipCode = z;
+        }
+
+
+        string getStreet() const {
 
             return this->street;
 
         }
 
-        std::string GetCity() {
+        string getCity() const {
 
             return this->city;
 
         }
 
-        std::string GetState() {
+        string getState() const {
 
             return this->state;
 
         }
 
-        int GetNumber() {
+        string getCountry() const {
 
-            return this->number;
+            return this->country;
 
         }
 
-        int GetZip() {
+        int getZip() const {
 
             return this->zipCode;
-
-        }
-
-        void SetStreet(std::string newStreet) {
-
-            this->street = newStreet;
-
-        }
-
-        void SetCity(std::string newCity) {
-
-            this->city = newCity;
-
-        }
-
-        void SetNumber(int newNumber) {
-
-            this->number = newNumber;
-
-        }
-
-        void SetZip(int newZip) {
-
-            this->zipCode = newZip;
-
-        }
-
-        void SetState(std::string newState) {
-
-            this->state = newState;
 
         }
 

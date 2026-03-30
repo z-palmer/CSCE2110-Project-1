@@ -1,59 +1,37 @@
 #ifndef TICKET_HPP
 #define TICKET_HPP
 
-#include "Driver.hpp"
-#include "Date.hpp"
 
+#include "Date.hpp"
+#include "Address.hpp"
 #include <string>
+using namespace std;
 
 class Ticket{
 
     private:
 
-        Driver* driver;
+        Date issueDate;
 
-        Date dateIssued;
+        Address location;
 
-        std::string charge;
+        string charge;
 
     public:
 
-        Driver* GetDriver() {
+        Ticket() {} 
 
-            return this->driver;
-
+        Ticket(Date d, Address a, string c) {
+            issueDate = d;
+            location = a;
+            charge = c;
         }
 
-        Date GetDate() {
-
-            return this->dateIssued;
-
+        void display() {
+            cout << "Issue Date: " << issueDate.getDay() << "/" << issueDate.getMonth() << "/" << issueDate.getYear() << endl;
+            cout << "Location: " << location.getStreet() << ", " << location.getCity() << ", " << location.getState() << ", " << location.getCountry() << " " << location.getZip() << endl;
+            cout << "Charge: " << charge << endl;
         }
-
-        std::string GetCharge() {
-
-            return this->charge;
-
-        }
-
-        void SetDriver(Driver* newDriver) {
-
-            this->driver = newDriver;
-
-        }
-
-        void SetDate(Date newDate) {
-
-            this->dateIssued = newDate;
-
-        }
-
-        void SetCharge(std::string newCharge) {
-
-            this->charge = newCharge;
-
-        }
-
 };
 
 #endif

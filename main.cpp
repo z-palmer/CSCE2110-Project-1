@@ -10,19 +10,19 @@
 using namespace std;
 
 void load(SearchDatabase& searchDB, OrderedDatabase& orderedDB); //loads drivers from csv
-void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDatabase& inactiveDB); // main UI
+void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDriverDatabase& inactiveDB); // main UI
 void insertDriver(SearchDatabase& searchDB, OrderedDatabase& orderedDB); // prompt and inser driver
 void searchDriver(SearchDatabase& searchDB); // search driver
 void retrieveRecent(OrderedDatabase& orderedDB); // retrieve N most recent licenses
 void retrieveOldest(OrderedDatabase& orderedDB); // retrieve N oldest licenses
-void moveInactive(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDatabase& inactiveDB); // move driver to inactive database  
+void moveInactive(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDriverDatabase& inactiveDB); // move driver to inactive database  
 void displayDrivers(OrderedDatabase& orderedDB); // display N drivers
 void exitProgram(); // exit
 
 int main() {
     SearchDatabase searchDB;
     OrderedDatabase orderedDB;
-    InactiveDatabase inactiveDB;
+    InactiveDriverDatabase inactiveDB;
 
     load(searchDB, orderedDB);
     displayMenu(searchDB, orderedDB, inactiveDB);
@@ -41,37 +41,52 @@ void load(SearchDatabase& searchDB, OrderedDatabase& orderedDB) {
     }
 
     string line;
-
-    getline(inFile, line);
+    getline(inFile, line); // skip header
 
     while (getline(inFile, line)) {
         stringstream ss(line);
 
-        string name, street, city, state, county;
-        string dobMonthStr, dobDayStr, dobYearStr;
-        string dlNumStr, expStr;
+        string name, street, city, state, county, workType, medical;
+        string ageStr, expStr, dlNumStr, zipStr;
+        string dobDayStr, dobMonthStr, dobYearStr;
+        string licDayStr, licMonthStr, licYearStr;
 
         getline(ss, name, ',');
         getline(ss, street, ',');
         getline(ss, city, ',');
         getline(ss, state, ',');
         getline(ss, county, ',');
-        getline(ss, dobMonthStr, ',');
+        getline(ss, ageStr, ',');
+        getline(ss, workType, ',');
+        getline(ss, medical, ',');
         getline(ss, dobDayStr, ',');
+        getline(ss, dobMonthStr, ',');
         getline(ss, dobYearStr, ',');
         getline(ss, dlNumStr, ',');
         getline(ss, expStr, ',');
+        getline(ss, zipStr, ',');
+        getline(ss, licDayStr, ',');
+        getline(ss, licMonthStr, ',');
+        getline(ss, licYearStr, ',');
 
-        int dobMonth = stoi(dobMonthStr);
-        int dobDay = stoi(dobDayStr);
-        int dobYear = stoi(dobYearStr);
-        int dlNum = stoi(dlNumStr);
+        int age = stoi(ageStr);
         int exp = stoi(expStr);
+        int dlNum = stoi(dlNumStr);
+        int zip = stoi(zipStr);
 
-        Address* addr = new Address(street, city, state, county);
-        Date* dob = new Date(dobMonth, dobDay, dobYear);
+        int dobDay = stoi(dobDayStr);
+        int dobMonth = stoi(dobMonthStr);
+        int dobYear = stoi(dobYearStr);
 
-        Driver* newDriver = new Driver(name, addr, dob, dlNum, exp);
+        int licDay = stoi(licDayStr);
+        int licMonth = stoi(licMonthStr);
+        int licYear = stoi(licYearStr);
+
+        Address addr(street, city, state, county, zip);
+        Date dob(dobDay, dobMonth, dobYear);
+        Date licenseDate(licDay, licMonth, licYear);
+
+        Driver* newDriver = new Driver(name, dlNum, age, exp, workType, medical, dob, licenseDate, addr);
 
         searchDB.insert(newDriver);
         orderedDB.push(newDriver);
@@ -83,7 +98,7 @@ void load(SearchDatabase& searchDB, OrderedDatabase& orderedDB) {
 
 //display menu and handle user input for various operations on the databases
 
-void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDatabase& inactiveDB) {
+void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDriverDatabase& inactiveDB) {
     bool keepRunning = true;
 
     while (keepRunning) {
@@ -144,66 +159,75 @@ void displayMenu(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveD
 
 void insertDriver(SearchDatabase& searchDB, OrderedDatabase& orderedDB) {
     string name, street, city, state, county;
-    int month, day, year;
-    int dlNum, exp;
+    string workType, medical;
+    int age, exp, dlNum;
+    int day, month, year, zip;
 
     cin.ignore();
 
-    cout << "Enter driver name: ";
+    cout << "Enter name: ";
     getline(cin, name);
 
-    cout << "Enter street: ";
-    getline(cin, street);
+    cout << "Age: ";
+    cin >> age;
 
-    cout << "Enter city: ";
-    getline(cin, city);
-
-    cout << "Enter state: ";
-    getline(cin, state);
-
-    cout << "Enter county: ";
-    getline(cin, county);
-
-    cout << "Enter birth month: ";
-    cin >> month;
-
-    cout << "Enter birth day: ";
-    cin >> day;
-
-    cout << "Enter birth year: ";
-    cin >> year;
-
-    cout << "Enter license number: ";
-    cin >> dlNum;
-
-    cout << "Enter years of driving experience: ";
+    cout << "Experience: ";
     cin >> exp;
 
-    Address* addr = new Address(street, city, state, county);
-    Date* dob = new Date(month, day, year);
-    Driver* newDriver = new Driver(name, addr, dob, dlNum, exp);
+    cout << "DL Number: ";
+    cin >> dlNum;
 
-    searchDB.insert(newDriver);
-    orderedDB.push(newDriver);
+    cout << "Work type: ";
+    cin >> workType;
 
-    cout << "Driver inserted successfully.\n";
+    cout << "Medical condition: ";
+    cin >> medical;
+
+    cout << "License day month year: ";
+    cin >> day >> month >> year;
+
+    cin.ignore();
+
+    cout << "Street: ";
+    getline(cin, street);
+
+    cout << "City: ";
+    getline(cin, city);
+
+    cout << "State: ";
+    getline(cin, state);
+
+    cout << "County: ";
+    getline(cin, county);
+
+    cout << "Zip: ";
+    cin >> zip;
+
+    Date date(day, month, year);
+    Address addr(street, city, state, county, zip);
+
+    Driver* d = new Driver(name, dlNum, age, exp, workType, medical, date, date, addr);
+
+    searchDB.insert(d);
+    orderedDB.push(d);
+
+    cout << "Inserted successfully.\n";
 }
 
 //function to search for a driver based on county
 
 void searchDriver(SearchDatabase& searchDB) {
-    string criteria;
+    int dl;
 
-    cin.ignore();
-    cout << "Enter search criteria (County): ";
-    getline(cin, criteria);
+    cout << "Enter DL number: ";
+    cin >> dl;
 
-    Driver* target = searchDB.search(criteria);
+    Driver* d = searchDB.search(dl);
 
-    if (target != nullptr) {
-        target->display();
+    if (d != nullptr) {
+        d->display();
     } else {
-        cout << "Driver not found.\n";
+        cout << "Not found.\n";
     }
 }
 
@@ -214,7 +238,7 @@ void retrieveRecent(OrderedDatabase& orderedDB) {
     cout << "Enter number of recent licenses to retrieve: ";
     cin >> n;
 
-    Driver* recentArr = new Driver[n];
+    Driver** recentArr = new Driver*[n];
     int actualCount = 0;
 
     for (int i = 0; i < n; i++) {
@@ -229,7 +253,7 @@ void retrieveRecent(OrderedDatabase& orderedDB) {
 
     cout << "\nShowing " << actualCount << " most recent licenses:\n";
     for (int i = 0; i < actualCount; i++) {
-        recentArr[i].display();
+        recentArr[i]->display();
         cout << "--------------------------\n";
     }
 
@@ -243,7 +267,7 @@ void retrieveOldest(OrderedDatabase& orderedDB) {
     cout << "Enter number of oldest licenses to retrieve: ";
     cin >> n;
 
-    Driver* oldestArr = new Driver[n];
+    Driver** oldestArr = new Driver*[n];
     int actualCount = 0;
 
     for (int i = 0; i < n; i++) {
@@ -258,7 +282,7 @@ void retrieveOldest(OrderedDatabase& orderedDB) {
 
     cout << "\nShowing " << actualCount << " oldest licenses:\n";
     for (int i = 0; i < actualCount; i++) {
-        oldestArr[i].display();
+        oldestArr[i]->display();
         cout << "--------------------------\n";
     }
 
@@ -267,20 +291,20 @@ void retrieveOldest(OrderedDatabase& orderedDB) {
 
 //function to move a driver from the search and ordered databases to the inactive database
 
-void moveInactive(SearchDatabase& searchDB, OrderedDatabase& orderedDB, InactiveDatabase& inactiveDB) {
-    string criteria;
+void moveInactive(SearchDatabase& searchDB,
+                  InactiveDriverDatabase& inactiveDB) {
+    int dl;
 
-    cin.ignore();
-    cout << "Enter criteria for driver to move to inactive: ";
-    getline(cin, criteria);
+    cout << "Enter DL number: ";
+    cin >> dl;
 
-    Driver* target = searchDB.search(criteria);
+    Driver* d = searchDB.search(dl);
 
-    if (target != nullptr) {
-        inactiveDB.insert(target);
-        searchDB.makeInactive(criteria);
-        orderedDB.makeInactive(criteria);
-        cout << "Driver moved to inactive database.\n";
+    if (d != nullptr) {
+        inactiveDB.insert(d);
+        searchDB.remove(dl);
+
+        cout << "Moved to inactive.\n";
     } else {
         cout << "Driver not found.\n";
     }
@@ -293,7 +317,7 @@ void displayDrivers(OrderedDatabase& orderedDB) {
     cout << "How many entries to display? ";
     cin >> n;
 
-    Node* current = orderedDB.first();
+    OrderedNode* current = orderedDB.first();
     int count = 0;
 
     cout << "\nDisplaying " << n << " drivers:\n";

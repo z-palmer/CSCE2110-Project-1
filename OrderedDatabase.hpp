@@ -1,7 +1,6 @@
 #ifndef ORDEREDDATABASE_HPP
 #define ORDEREDDATABASE_HPP
 
-#include <iostream>
 #include "Driver.hpp"
 
 using namespace std;
@@ -9,12 +8,12 @@ using namespace std;
 // =========================
 // NODE STRUCTURE
 // =========================
-struct Node {
-    Driver data;
-    Node* next;
-    Node* prev;
+struct OrderedNode {
+    Driver* data;
+    OrderedNode* next;
+    OrderedNode* prev;
 
-    Node(Driver d) {
+    OrderedNode(Driver* d) {
         data = d;
         next = nullptr;
         prev = nullptr;
@@ -26,8 +25,8 @@ struct Node {
 // =========================
 class OrderedDatabase {
 private:
-    Node* head;
-    Node* tail;
+    OrderedNode* head;
+    OrderedNode* tail;
 
 public:
 
@@ -42,42 +41,36 @@ public:
     // =========================
     // INSERT DRIVER (push)
     // =========================
-    void push(Driver data) {
-        Node* newNode = new Node(data);
+    void push(Driver* data) {
+        OrderedNode* newNode = new OrderedNode(data);
 
         if (head == nullptr) {
             head = tail = newNode;
         } else {
-            newNode->next = head;
-            head->prev = newNode;
-            head = newNode;
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
         }
     }
 
     // =========================
     // RETURN FIRST NODE
     // =========================
-    Node* first() {
+    OrderedNode* first() {
         return head;
     }
 
-    // =========================
-    // RETURN LAST NODE
-    // =========================
-    Node* last() {
-        return tail;
-    }
 
     // =========================
     // REMOVE OLDEST DRIVER (popFront)
     // =========================
-    Driver popFront() {
+    Driver* popFront() {
         if (head == nullptr) {
-            throw runtime_error("List is empty");
+           return nullptr; // List is empty
         }
 
-        Node* temp = head;
-        Driver data = temp->data;
+        OrderedNode* temp = head;
+        Driver* d = temp->data;
 
         head = head->next;
 
@@ -88,19 +81,19 @@ public:
         }
 
         delete temp;
-        return data;
+        return d;
     }
 
     // =========================
     // REMOVE MOST RECENT DRIVER (popBack)
     // =========================
-    Driver popBack() {
+    Driver* popBack() {
         if (tail == nullptr) {
-            throw runtime_error("List is empty");
+            return nullptr; // List is empty
         }
 
-        Node* temp = tail;
-        Driver data = temp->data;
+        OrderedNode* temp = tail;
+        Driver* d = temp->data;
 
         tail = tail->prev;
 
@@ -111,46 +104,31 @@ public:
         }
 
         delete temp;
-        return data;
+        return d;
     }
 
-    // =========================
-    // REMOVE DRIVER BASED ON DATE (makeInactive)
-    // =========================
-    void makeInactive(Date targetDate) {
-        Node* current = head;
+    void displayRecent(int n) {
+        OrderedNode* current = tail;
+        int count = 0;
 
-        while (current != nullptr) {
-
-            if (current->data.getDate() == targetDate) {
-
-                Node* prevNode = current->prev;
-                Node* nextNode = current->next;
-
-                // Fix links
-                if (prevNode != nullptr) {
-                    prevNode->next = nextNode;
-                } else {
-                    head = nextNode;
-                }
-
-                if (nextNode != nullptr) {
-                    nextNode->prev = prevNode;
-                } else {
-                    tail = prevNode;
-                }
-
-                delete current;
-
-                cout << "Driver moved to inactive.\n";
-                return;
-            }
-
-            current = current->next;
+        while (current != nullptr && count < n) {
+            current->data->display();
+            current = current->prev;
+            count++;
         }
-
-        cout << "Driver not found.\n";
     }
+
+    void displayOldest(int n) {
+        OrderedNode* current = head;
+        int count = 0;
+
+        while (current != nullptr && count < n) {
+            current->data->display();
+            current = current->next;
+            count++;
+        }
+    }
+
 };
 
 #endif
